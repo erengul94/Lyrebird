@@ -25,7 +25,7 @@ SECRET_KEY = '&ogxt-7n!-l!ng+0i0^de=db55rfp(0+gvtrq)pamna+*#0%ou'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '0.0.0.0']
 
 
 # Application definition
@@ -43,7 +43,8 @@ INSTALLED_APPS = [
     'patient',
     'session',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
+    'rest_framework_simplejwt'
 ]
 
 MIDDLEWARE = [
@@ -124,9 +125,10 @@ USE_TZ = True
 CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # React frontend
+    "http://localhost:5173",  # React frontend
 ]
 
+CORS_ALLOW_CREDENTIALS = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
@@ -143,3 +145,9 @@ RABBITMQ_PASSWORD="test3142"
 RABBITMQ_URI="localhost"
 RABBITMQ_USERNAME="cool"
 VHOST="lyrebird"
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}

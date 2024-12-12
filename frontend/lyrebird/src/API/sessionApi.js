@@ -1,18 +1,25 @@
+import { axiosInstance } from "./utils";
+
 const APIURL = 'http://localhost:8000';
 
 
-async function recordSession(formData) {
+async function recordSession(formData, patientID) {
     console.log("record session triggered");
-    const url = APIURL + '/createSession/';
+    const url = APIURL + `/createSession/`;
     console.log(url);
-
+    const accessToken = JSON.parse(localStorage.getItem("user"))['access']
+    formData.append("patientID", patientID);
     try {
-        const response = await fetch(url, {
-          method: 'POST',
-          body: formData,
-        });
+
+        console.log(formData)
+        const response = await axiosInstance.post(url, formData, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+            body: formData
+          });
         
-        if (response.ok) {
+        if (response) {
           alert('Audio successfully uploaded!');
         } else {
           const error = await response.text();
@@ -21,7 +28,7 @@ async function recordSession(formData) {
       } catch (error) {
         console.error('Error uploading audio:', error);
       }
-    };
+    };    
 
 
 

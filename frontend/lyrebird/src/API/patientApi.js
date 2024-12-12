@@ -1,15 +1,24 @@
+
+import { axiosInstance } from "./utils";
+
 const APIURL = 'http://localhost:8000';
 
 
 async function getPatients() {
-    const url = APIURL + '/patients';
-    console.log("Patients retreived")
+    const url = 'patients';
+    const accessToken = JSON.parse(localStorage.getItem("user"))['access']
 
     try {
-        const response = await fetch(url);
-        if (response.ok) {
+        const response = await axiosInstance.get(url, {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+        if (response) {
             // process the response
-            const patients = await response.json();
+            const patients = response.data
+            console.log(response.data)
+            console.log("Patients retreived")
             // // console.log(pages)
             return patients;
         } else {
@@ -25,16 +34,24 @@ async function getPatients() {
 
 
 async function getPatient(patientID) {
-    const url = APIURL + '/patient/' + patientID;
+
+    const url =`patient/${patientID}`;
     console.log("Patient retreived")
 
+    const accessToken = JSON.parse(localStorage.getItem("user"))['access']
+    
     try {
-        const response = await fetch(url);
+        const response = await axiosInstance.get(url,
+        {    
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
         // console.log(response);
 
-        if (response.ok) {
+        if (response) {
             // process the response
-            const patient = await response.json();
+            const patient = await response.data;
             // console.log(patient)
             return patient;
         } else {

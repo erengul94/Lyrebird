@@ -15,6 +15,8 @@ class Session(models.Model):
     clinic = models.ForeignKey(Clinic, on_delete=models.CASCADE)
     started_at = models.DateTimeField(auto_now_add=True)
     end_at = models.DateTimeField(auto_now_add=True)
+    recording_notes = models.TextField(null=True, blank=True)
+    note = models.TextField(null=True, blank=True)
     record_file = models.FileField(upload_to="records", null=True) # URL to the audio recording
 
 

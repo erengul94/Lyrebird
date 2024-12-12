@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from patient.views import patient_list, get_patient
 from session.views import create_session
+from doctor.views import doctor_login
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,6 +25,6 @@ urlpatterns = [
     path('patient/<int:_id>', get_patient),
     path('createSession/', create_session),
 
-    path('doctorLogin/', create_session),
+    path('login/', doctor_login),
 
 ]

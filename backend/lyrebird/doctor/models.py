@@ -11,3 +11,11 @@ class Doctor(models.Model):
 
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
+
+
+    def toDict(self):
+        return {
+            "first_name": self.user.first_name,
+            "last_name": self.user.last_name,
+
+        }

@@ -10,13 +10,27 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* General styles for the entire app */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa; /* Light background for better readability */
+}
 
 .full-screen-container {
-  height: 100vh; /* Full height of the viewport */
-  width: 100vw; /* Full width of the viewport */
-  display: flex; /* Optional: Flexbox for alignment */
-  box-sizing: border-box; /* Include padding and border in height/width */
+  min-height: calc(100vh - 56px); /* Adjust height minus navbar height */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  overflow-y: auto; /* Enable scrolling for long content */
+  background-color: #ffffff; /* White background for content area */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 16px;
 }
+
 
 /* App.css */
 .hover-link {
@@ -32,3 +46,19 @@
 button {
   border-radius: 20px; /* Rounded corners for buttons */
 }
+
+@media (max-width: 768px) {
+  .full-screen-container {
+    padding: 8px; /* Reduce padding on smaller screens */
+  }
+
+  .list-item {
+    font-size: 14px; /* Smaller text for better fit */
+    padding: 8px 12px; /* Adjust padding */
+  }
+
+  button {
+    padding: 6px 12px; /* Smaller buttons for smaller screens */
+  }
+}
+

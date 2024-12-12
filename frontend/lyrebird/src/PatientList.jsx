@@ -23,13 +23,14 @@ function PatientList() {
 }, []);
 
   const handleView = (patient) => {
-    navigate('/patientDetail')
+    navigate(`/patientDetail?patientID=${patient.id}`)
   };
 
   const handleRecord = (patient) => {
     // setModalContent(`Recording data for patient: ${patient.name}`);
     // setShowModal(true);
-    navigate("/createSession")
+    const url = `/createSession?patientID=${patient.id}`
+    navigate(url)
   };
 
   const handleNotes = (patient) => {

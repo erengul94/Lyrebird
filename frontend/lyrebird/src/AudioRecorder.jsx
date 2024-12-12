@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react';
 import './App.css'; // Import CSS for animation
-import {recordSession} from '../src/API/sessionApi';
- 
-const VoiceRecorder = () => {
+import { recordSession } from '../src/API/sessionApi';
+
+const VoiceRecorder = (props) => {
   const [isRecording, setIsRecording] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);  // State to track pause status
   const [audioURL, setAudioURL] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
   const mediaRecorderRef = useRef(null);
@@ -30,6 +31,7 @@ const VoiceRecorder = () => {
 
       mediaRecorderRef.current.start();
       setIsRecording(true);
+      setIsPaused(false);  // Reset the pause state
     } catch (error) {
       console.error('Error accessing microphone:', error);
     }
@@ -42,6 +44,20 @@ const VoiceRecorder = () => {
     }
   };
 
+  const pauseRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.pause();
+      setIsPaused(true);  // Set pause state to true
+    }
+  };
+
+  const resumeRecording = () => {
+    if (mediaRecorderRef.current && isPaused) {
+      mediaRecorderRef.current.resume();
+      setIsPaused(false);  // Set pause state to false
+    }
+  };
+
   const submitAudio = async () => {
     if (!audioBlob) {
       alert('No audio recorded to submit!');
@@ -49,20 +65,36 @@ const VoiceRecorder = () => {
     }
     const formData = new FormData();
     formData.append('audio', audioBlob, 'recording.wav');
-    await recordSession(formData);
-    
+    await recordSession(formData, props.patientID);
   };
 
   return (
     <div style={{ textAlign: 'center', padding: '20px' }}>
       <h2>Voice Recorder</h2>
       {isRecording ? (
-        <button
-          onClick={stopRecording}
-          className="pulsing-button"
-        >
-          Stop Recording
-        </button>
+        <div>
+          {isPaused ? (
+            <button
+              onClick={resumeRecording}
+              className="pulsing-button"
+            >
+              Resume Recording
+            </button>
+          ) : (
+            <button
+              onClick={pauseRecording}
+              className="pulsing-button"
+            >
+              Pause Recording
+            </button>
+          )}
+          <button
+            onClick={stopRecording}
+            className="pulsing-button"
+          >
+            Stop Recording
+          </button>
+        </div>
       ) : (
         <button
           onClick={startRecording}

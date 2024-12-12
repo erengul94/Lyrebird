@@ -1,15 +1,19 @@
+
+
+const APIURL = 'http://localhost:8000';
+
 async function logIn(credentials) {
+    console.log("function entered")
+    
     try {
-        const response = await fetch(APIURL + '/login', {
+        const response = await fetch(APIURL + '/login/', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            credentials: 'include',
-            body: JSON.stringify({
-                "username": credentials.username,
-                "password": credentials.password
-            })
+            body: JSON.stringify(
+                credentials
+            )
         });
         if (response.ok) {
             return await response.json();
@@ -23,8 +27,14 @@ async function logIn(credentials) {
 };
 
 async function getUserInfo() {
+    // const token = getCookie('csrftoken')
+    console.log(token);
     const response = await fetch(APIURL + '/current/userInfo', {
         credentials: 'include',
+        headers: {
+            "X-CSRF-Token": token, 
+            "Content-Type": "application/json"
+          }
     });
     const user = await response.json();
     if (response.ok) {

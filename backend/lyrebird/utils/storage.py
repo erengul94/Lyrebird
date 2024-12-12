@@ -1,10 +1,15 @@
+import os
+import logging
 from google.cloud import storage
+from google.auth.exceptions import DefaultCredentialsError
 
-import os, requests
-from datetime import timedelta
+# Set up logging
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-
+# Set your credentials for the GCS Client
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '/Users/erengul/Documents/projects/Lyrebird/backend/lyrebird/google_service_account.json'
+
 
 def upload_to_gcs(bucket_name, source_file, destination_blob_name):
     """
@@ -12,47 +17,71 @@ def upload_to_gcs(bucket_name, source_file, destination_blob_name):
 
     Args:
         bucket_name (str): The name of the GCS bucket.
-        source_file (File): The file object or file path.
+        source_file (File or str): The file object or file path.
         destination_blob_name (str): The path in the bucket where the file will be saved.
 
     Returns:
         str: The public URL of the uploaded file.
     """
-    # Initialize the GCS client
+    try:
+        # Initialize the GCS client
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(destination_blob_name)
 
-    storage_client = storage.Client()
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(destination_blob_name)
+        # Upload the file
+        if hasattr(source_file, 'read'):  # If the source is a file object
+            logger.info(f"Uploading file object to GCS bucket: {bucket_name}")
+            blob.upload_from_file(source_file)
+        elif isinstance(source_file, str):  # If the source is a file path
+            logger.info(f"Uploading file from path '{source_file}' to GCS bucket: {bucket_name}")
+            blob.upload_from_filename(source_file)
+        else:
+            logger.error(f"Invalid file type provided: {type(source_file)}")
+            raise ValueError("Source file must be a file object or a file path.")
 
-    # Upload the file
-    if hasattr(source_file, 'read'):  # For file objects (e.g., from Django forms)
-        blob.upload_from_file(source_file)
-    else:  # For file paths
-        blob.upload_from_filename(source_file)
+        # Optionally make the blob publicly accessible
+        # blob.make_public()
 
-    # Make the blob publicly accessible (optional)
-    # blob.make_public()
+        # Return the public URL of the uploaded file (if accessible)
+        return blob.public_url
 
-    return blob.public_url
+    except DefaultCredentialsError as e:
+        logger.error(f"Google Cloud credentials error: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Failed to upload file to GCS: {e}")
+        raise
 
 
-def generate_signed_url(bucket_name, blob_name, expiration_minutes=15):
-    """Generate a signed URL to access a private file in GCS."""
-    storage_client = storage.Client()
+def download_file_from_gcs(bucket_name, destination_file_name, destination_blob_name):
+    """
+    Downloads a file from the specified GCS bucket.
 
-    # Get the bucket and blob (file) reference
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(blob_name)
+    Args:
+        bucket_name (str): The name of the GCS bucket.
+        destination_file_name (str): The local file path where the file will be saved.
+        destination_blob_name (str): The blob (file) name in GCS.
 
-    # Generate a signed URL that expires in `expiration_minutes`
-    signed_url = blob.generate_signed_url(expiration=timedelta(minutes=expiration_minutes), method="GET")
+    Returns:
+        google.cloud.storage.blob.Blob: The blob object.
+    """
+    try:
+        # Initialize the GCS client
+        storage_client = storage.Client()
+        bucket = storage_client.bucket(bucket_name)
+        blob = bucket.blob(destination_blob_name)
 
-    return signed_url
+        # Download the file
+        logger.info(f"Downloading file from GCS bucket: {bucket_name}, blob: {destination_blob_name}")
+        blob.download_to_filename(destination_file_name)
 
-def download_audio_from_url(signed_url):
-    """Download the audio file from a signed URL."""
-    response = requests.get(signed_url)
-    if response.status_code == 200:
-        return response.content
-    else:
-        raise Exception(f"Failed to download audio: {response.status_code}")
+        # Return the blob object for further handling if needed
+        return blob
+
+    except DefaultCredentialsError as e:
+        logger.error(f"Google Cloud credentials error: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Failed to download file from GCS: {e}")
+        raise

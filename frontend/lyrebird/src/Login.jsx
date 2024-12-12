@@ -2,21 +2,36 @@ import React, { useState } from "react";
 import { Form, Button, Container, Row, Col, Alert } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 
-function LoginPage() {
-  const [email, setEmail] = useState("");
+import { logIn } from "./API/userApi";
+
+import {axiosInstance} from './API/utils'
+
+function LoginPage(props) {
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
 
-    // Mock validation (replace with actual API request)
-    if (email === "doctor@example.com" && password === "password123") {
-      navigate("/"); // Redirect to the home page after successful login
-    } else {
-      setError("Invalid email or password");
-    }
+    const credentials = {"username": username, "password": password}
+    try {
+        const response = await axiosInstance.post('login/', {
+          username,
+          password,
+        });
+        // setError('');
+        // console.log("handle login");
+        localStorage.setItem("user", JSON.stringify(response.data.token_data))
+        console.log(response);
+        props.setAuthenticated(true)
+        navigate("/patients")
+
+      } catch (err) {
+        setError('Invalid credentials');
+      }
+
   };
 
   return (
@@ -29,10 +44,10 @@ function LoginPage() {
             <Form.Group className="mb-3" controlId="formEmail">
               <Form.Label>Email address</Form.Label>
               <Form.Control
-                type="email"
-                placeholder="Enter email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="text"
+                placeholder="Enter username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
                 required
               />
             </Form.Group>
